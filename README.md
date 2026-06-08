@@ -38,7 +38,26 @@ http://localhost:5173
 
 ## Getting Started
 
+### Clone Repository
+
+```bash
+git clone <repository-url>
+cd frontend
+```
+
 ### Create Environment File
+
+PowerShell
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Command Prompt
+
+```cmd
+copy .env.example .env
+```
 
 Example:
 

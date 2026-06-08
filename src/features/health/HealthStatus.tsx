@@ -24,7 +24,33 @@ export function HealthStatus() {
     }
 
     useEffect(() => {
-        void checkHealth();
+        let ignore = false;
+
+        async function loadHealth() {
+            try {
+                const response = await getHealth();
+
+                if (ignore) {
+                    return;
+                }
+
+                setMessage(response.data.status);
+                setStatus('success');
+            } catch {
+                if (ignore) {
+                    return;
+                }
+
+                setMessage('Unable to connect to backend');
+                setStatus('error');
+            }
+        }
+
+        void loadHealth();
+
+        return () => {
+            ignore = true;
+        };
     }, []);
 
     return (
@@ -35,9 +61,7 @@ export function HealthStatus() {
                 <Alert severity="success">Backend status: {message}</Alert>
             )}
 
-            {status === 'error' && (
-                <Alert severity="error">{message}</Alert>
-            )}
+            {status === 'error' && <Alert severity="error">{message}</Alert>}
 
             <Button
                 variant="contained"
