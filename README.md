@@ -38,12 +38,6 @@ http://localhost:5173
 
 ## Getting Started
 
-### Install Dependencies
-
-```bash
-npm install
-```
-
 ### Create Environment File
 
 Example:
@@ -57,6 +51,12 @@ Environment values:
 | Key               | Description          |
 | ----------------- | -------------------- |
 | VITE_API_BASE_URL | Backend API base URL |
+
+### Install Dependencies
+
+```bash
+npm install
+```
 
 ### Run Application
 
@@ -148,6 +148,8 @@ Responsibilities:
 | types      | Shared TypeScript types   |
 | utils      | Utility functions         |
 
+---
+
 ### Feature Structure
 
 Every business feature should follow this structure:
@@ -158,7 +160,8 @@ features/
     ├── components/
     ├── dto.ts
     ├── service.ts
-    └── page.tsx
+    ├── page.tsx
+    └── index.ts
 ```
 
 Responsibilities:
@@ -169,13 +172,17 @@ Responsibilities:
 | dto.ts     | Request and response models    |
 | service.ts | API communication              |
 | page.tsx   | Feature page                   |
+| index.ts   | Public exports                 |
 
 Guidelines:
 
 * Feature-specific code should stay inside the feature directory.
+* Feature exports should be centralized through `index.ts`.
 * Shared components belong in `components/`.
 * Shared types belong in `types/`.
 * Shared utilities belong in `utils/`.
+
+---
 
 ### DTO
 
@@ -199,6 +206,9 @@ Guidelines:
 * Request DTO should represent API requests.
 * Response DTO should represent API responses.
 * DTO should not contain UI-specific logic.
+* DTO should not contain business logic.
+
+---
 
 ### State Management
 
@@ -218,7 +228,9 @@ Avoid storing:
 * List pages
 * Temporary form state
 
-Feature-specific state should remain inside React components.
+Feature-specific state should remain inside React components unless there is a clear business requirement.
+
+---
 
 ### API Layer
 
@@ -242,7 +254,13 @@ export function getHealth() {
 }
 ```
 
-Do not call fetch directly from pages or components.
+Guidelines:
+
+* Do not call `fetch()` directly from pages.
+* Do not call `fetch()` directly from components.
+* All API communication should go through feature services.
+
+---
 
 ### API Contracts
 
@@ -296,6 +314,106 @@ Validation error:
 }
 ```
 
+Frontend contracts:
+
+```ts
+ApiSuccess<T>
+ApiSuccessWithPagination<T>
+ApiErrorResponse
+ApiValidationErrorResponse
+```
+
+---
+
+### Error Handling
+
+API errors are converted into `ApiError`.
+
+Flow:
+
+```text
+Backend Error Response
+        ↓
+http.ts
+        ↓
+ApiError
+        ↓
+Feature / Page
+```
+
+Example:
+
+```ts
+try {
+  await getHealth();
+} catch (error) {
+  if (error instanceof ApiError) {
+    logger.error(error.code, error);
+  }
+}
+```
+
+Guidelines:
+
+* Components should not parse raw HTTP responses.
+* Components should handle ApiError only.
+* API errors should be centralized in the HTTP layer.
+
+---
+
+### Logging
+
+Use the shared logger wrapper.
+
+Example:
+
+```ts
+logger.info('load users');
+logger.warn('unexpected state');
+logger.error('api error', error);
+```
+
+Do not use:
+
+```ts
+console.log(...);
+console.error(...);
+```
+
+The logger wrapper allows future integration with:
+
+* Sentry
+* Datadog
+* Application Insights
+
+---
+
+### Error Boundary
+
+The application is protected by a global React Error Boundary.
+
+Flow:
+
+```text
+React Runtime Error
+        ↓
+Error Boundary
+        ↓
+logger.error(...)
+        ↓
+Fallback UI
+```
+
+The Error Boundary prevents the application from crashing due to unexpected rendering errors.
+
+Location:
+
+```text
+components/error-boundary/
+```
+
+---
+
 ### Internationalization
 
 Translations are managed through i18next.
@@ -318,6 +436,8 @@ const { t } = useTranslation();
 return <div>{t('app.title')}</div>;
 ```
 
+---
+
 ### Theme
 
 Material UI theme is configured in:
@@ -328,6 +448,8 @@ theme/theme.ts
 
 All application-wide theme customization should be centralized in the theme directory.
 
+---
+
 ### Typed Redux Hooks
 
 Use typed Redux hooks.
@@ -335,7 +457,7 @@ Use typed Redux hooks.
 ```ts
 const dispatch = useAppDispatch();
 
-const value = useAppSelector(
+const auth = useAppSelector(
   (state) => state.auth,
 );
 ```
@@ -343,9 +465,11 @@ const value = useAppSelector(
 Do not use:
 
 ```ts
-useDispatch<any>()
-useSelector<any>()
+useDispatch<any>();
+useSelector<any>();
 ```
+
+---
 
 ### Project Structure
 
@@ -353,25 +477,69 @@ useSelector<any>()
 src/
 ├─ app/
 │  └─ providers.tsx
+│
 ├─ components/
+│  └─ error-boundary/
+│
 ├─ features/
 │  └─ health/
+│
 ├─ hooks/
+│  ├─ useAppDispatch.ts
+│  └─ useAppSelector.ts
+│
 ├─ i18n/
 │  ├─ index.ts
 │  └─ locales/
+│
 ├─ pages/
 │  └─ HomePage.tsx
+│
 ├─ services/
 │  └─ http.ts
+│
 ├─ store/
 │  └─ index.ts
+│
 ├─ theme/
 │  └─ theme.ts
+│
+├─ errors/
+│  └─ api-error.ts
+│
 ├─ types/
 │  └─ api.ts
+│
 ├─ utils/
+│  └─ logger.ts
+│
 ├─ App.tsx
-├─ index.css
-└─ main.tsx
+├─ main.tsx
+└─ index.css
 ```
+
+---
+
+## Foundation
+
+Implemented:
+
+* React
+* Vite
+* Redux
+* Material UI
+* i18n
+* Typed Redux Hooks
+* HTTP Client
+* API Contract
+* Error Handling
+* Error Boundary
+* Logger Wrapper
+* Health Feature
+
+Future:
+
+* Notification Strategy
+* Form Validation Strategy
+* Authentication
+* Authorization
