@@ -1,0 +1,53 @@
+import { Alert, Button, Stack, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+
+import { getHealth } from './service';
+
+type Status = 'idle' | 'loading' | 'success' | 'error';
+
+export function HealthStatus() {
+    const [status, setStatus] = useState<Status>('idle');
+    const [message, setMessage] = useState<string>('');
+
+    async function checkHealth() {
+        try {
+            setStatus('loading');
+
+            const response = await getHealth();
+
+            setMessage(response.data.status);
+            setStatus('success');
+        } catch {
+            setMessage('Unable to connect to backend');
+            setStatus('error');
+        }
+    }
+
+    useEffect(() => {
+        void checkHealth();
+    }, []);
+
+    return (
+        <Stack spacing={2}>
+            <Typography variant="h6">Backend Health</Typography>
+
+            {status === 'success' && (
+                <Alert severity="success">Backend status: {message}</Alert>
+            )}
+
+            {status === 'error' && (
+                <Alert severity="error">{message}</Alert>
+            )}
+
+            <Button
+                variant="contained"
+                onClick={() => {
+                    void checkHealth();
+                }}
+                disabled={status === 'loading'}
+            >
+                Check Health
+            </Button>
+        </Stack>
+    );
+}
