@@ -1,5 +1,5 @@
 import { Alert, Button, Stack, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { logger } from '../../utils/logger';
 import { getHealth } from './service';
 
@@ -28,33 +28,6 @@ export function HealthStatus() {
             setStatus('error');
         }
     }
-
-    useEffect(() => {
-        let ignore = false;
-
-        async function loadHealth() {
-            logger.info('health check started');
-
-            try {
-                const response = await getHealth();
-
-                setMessage(response.data.status);
-                setStatus('success');
-            } catch (error) {
-                logger.error('health check failed', {
-                    error,
-                });
-
-                setMessage('Unable to connect to backend');
-                setStatus('error');
-            }
-        }
-        void loadHealth();
-
-        return () => {
-            ignore = true;
-        };
-    }, []);
 
     return (
         <Stack spacing={2}>
