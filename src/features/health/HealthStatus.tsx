@@ -10,6 +10,8 @@ export function HealthStatus() {
     const [message, setMessage] = useState<string>('');
 
     async function checkHealth() {
+        logger.info('health check started');
+
         try {
             setStatus('loading');
 
@@ -31,25 +33,22 @@ export function HealthStatus() {
         let ignore = false;
 
         async function loadHealth() {
+            logger.info('health check started');
+
             try {
                 const response = await getHealth();
 
-                if (ignore) {
-                    return;
-                }
-
                 setMessage(response.data.status);
                 setStatus('success');
-            } catch {
-                if (ignore) {
-                    return;
-                }
+            } catch (error) {
+                logger.error('health check failed', {
+                    error,
+                });
 
                 setMessage('Unable to connect to backend');
                 setStatus('error');
             }
         }
-
         void loadHealth();
 
         return () => {
