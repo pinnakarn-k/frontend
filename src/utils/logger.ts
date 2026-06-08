@@ -1,13 +1,15 @@
+type LogContext = Record<string, unknown>;
+
 export const logger = {
-    info(message: string, data?: unknown) {
-        console.info(message, data);
+    info(message: string, context?: LogContext) {
+        console.info(message, context);
     },
 
-    warn(message: string, data?: unknown) {
-        console.warn(message, data);
+    warn(message: string, context?: LogContext) {
+        console.warn(message, context);
     },
 
-    error(message: string, error?: unknown) {
-        console.error(message, error);
+    error(message: string, context?: LogContext) {
+        console.error(message, context);
     },
 };

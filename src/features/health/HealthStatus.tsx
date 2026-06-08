@@ -1,6 +1,6 @@
 import { Alert, Button, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-
+import { logger } from '../../utils/logger';
 import { getHealth } from './service';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -17,7 +17,11 @@ export function HealthStatus() {
 
             setMessage(response.data.status);
             setStatus('success');
-        } catch {
+        } catch (error) {
+            logger.error('health check failed', {
+                error,
+            });
+
             setMessage('Unable to connect to backend');
             setStatus('error');
         }
