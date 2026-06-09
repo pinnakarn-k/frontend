@@ -6,7 +6,7 @@ import { MainLayout } from '../layouts/MainLayout';
 export const router = createBrowserRouter([
     {
         path: '/',
-        element: <Navigate to="/healthz" replace />,
+        element: <Navigate to="/hd" replace />,
     },
 
     {
